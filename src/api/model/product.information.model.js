@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const productinformationSchema = new mongoose.Schema({
+
+const schema = new mongoose.Schema({
   product_id: {
     type: String,
     require: true,
@@ -8,7 +9,6 @@ const productinformationSchema = new mongoose.Schema({
     type: String,
     require: true,
   },
-
   manufacturer: {
     type: String,
     require: true,
@@ -25,7 +25,7 @@ const productinformationSchema = new mongoose.Schema({
     type: Number,
     require: true,
   },
-  Includes_Rechargeable_battery: {
+  includes_rechargeable_battery: {
     type: String,
     require: true,
   },
@@ -50,9 +50,5 @@ const productinformationSchema = new mongoose.Schema({
     require: true,
   },
 });
-const Productinformation = mongoose.model(
-  "ProductInformation",
-  productinformationSchema
-);
 
-module.exports = Productinformation;
+module.exports = mongoose.model("ProductInformation", schema);

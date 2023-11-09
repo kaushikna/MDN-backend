@@ -1,23 +1,27 @@
 const router = require("express").Router();
+const { validate } = require("../../validation/common.validation");
+const {
+  loginSchema,
+  registerSchema,
+  verifySchema,
+  resendSchema,
+  changePasswordSchema,
+  forgotPasswordSchema
+} = require("../../validation/auth.validation");
 const {
   logIn,
   register,
   verifyOTP,
   resendOTP,
   changePassword,
-  forgotPassword
+  forgotPassword,
 } = require("../controllers/auth.controller");
-const {
-  isRequestValidated,
-  validateSignUpRequest,
-  validateLogInRequest,
-} = require("../../validator/validator");
 
-router.post("/login", validateLogInRequest, isRequestValidated, logIn);
-router.post("/register", validateSignUpRequest, isRequestValidated, register);
-router.post("/verify-otp", verifyOTP);
-router.post("/resend-otp", resendOTP);
-router.put("/change-password", isRequestValidated, changePassword);
-router.put("/forgot-password", isRequestValidated, forgotPassword);
+router.post("/register", validate(registerSchema), register);
+router.post("/login", validate(loginSchema), logIn);
+router.post("/verify-otp", validate(verifySchema), verifyOTP);
+router.post("/resend-otp", validate(resendSchema), resendOTP);
+router.put("/change-password", validate(changePasswordSchema), changePassword);
+router.put("/forgot-password", validate(forgotPasswordSchema), forgotPassword);
 
 module.exports = router;

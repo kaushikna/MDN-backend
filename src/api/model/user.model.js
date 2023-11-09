@@ -1,19 +1,19 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
-const userSchema = new mongoose.Schema(
+const schema = new mongoose.Schema(
   {
-    firstName: {
+    first_name: {
       type: String,
       require: true,
       trim: true,
     },
-    lastName: {
+    last_name: {
       type: String,
       require: true,
       trim: true,
     },
-    userName: {
+    user_name: {
       type: String,
       require: true,
     },
@@ -27,8 +27,9 @@ const userSchema = new mongoose.Schema(
     hash_password: {
       type: String,
       require: true,
+      select: false,
     },
-    contactNumber: {
+    contact_number: {
       type: String,
       require: true,
       min: 10,
@@ -38,21 +39,28 @@ const userSchema = new mongoose.Schema(
       createdAt: Date.now(),
       expiresAt: Date.now() + 600000,
     },
-    verified: Boolean,
+    verified: {
+      type: Boolean,
+      default: false,
+    },
+    is_admin: {
+      type: Boolean,
+      default: false,
+    },
   },
-  { timestamps: true }
+  { timestamps: true, toJSON: {virtuals: true}, toObject: {virtuals: true} }
 );
 
-userSchema.virtual("fullName").get(function () {
-  return `${this.firstName} ${this.lastName}`;
+schema.virtual("full_name").get(function () {
+  return `${this.first_name} ${this.last_name}`;
 });
-userSchema.methods.hashPassword = function (password) {
+schema.statics.hashPassword = function (password) {
   const saltRounds = 10;
   return bcrypt.hashSync(password, saltRounds);
 };
 
-userSchema.methods.comparePassword = function (password) {
+schema.methods.comparePassword = function (password) {
   return bcrypt.compareSync(password, this.hash_password);
 };
-// create db collection
-module.exports = mongoose.model("varifydb1", userSchema);
+
+module.exports = mongoose.model("User", schema);

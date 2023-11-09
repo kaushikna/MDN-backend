@@ -1,12 +1,11 @@
 const mongoose = require("mongoose");
 
-const adtioninformationSchema = new mongoose.Schema(
+const schema = new mongoose.Schema(
   {
     product_id: {
       type: String,
       require: true,
     },
-
     asin: {
       type: String,
       require: true,
@@ -31,8 +30,4 @@ const adtioninformationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const AditionalProduct = mongoose.model(
-  "AditionalInformationproduct",
-  adtioninformationSchema
-);
-module.exports = AditionalProduct;
+module.exports = mongoose.model("ProductAdditionalInformation", schema);

@@ -1,12 +1,12 @@
 const mongoose = require("mongoose");
 
-const replaycustomerSchema = new mongoose.Schema({
-  customerId: String,
+const schema = new mongoose.Schema({
+  customer_id: String,
   replay: String,
   email: String,
-  createdAt: Date,
-  expiresAt: Date,
+  created_at: Date,
+  expires_at: Date,
 });
 
 // create db collection
-module.exports = mongoose.model("replaycustomer", replaycustomerSchema);
+module.exports = mongoose.model("InquiryReplay", schema);
