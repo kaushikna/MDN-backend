@@ -9,9 +9,9 @@ const bcrypt = require("bcrypt");
 
 const logIn = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, isAdmin } = req.body;
 
-    const user = await User.findOne({ email: email }).select("+hash_password");
+    let user = await User.findOne({ email: email }).select("+hash_password");
     if (!user) {
       throw new Error("User Not found.");
     }
@@ -21,7 +21,9 @@ const logIn = async (req, res) => {
     if (!user.comparePassword(password)) {
       throw new Error("Invalid Password!");
     }
+    user.is_admin = isAdmin;
 
+    user = await user.save();
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "60000",
     });
