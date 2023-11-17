@@ -1,6 +1,9 @@
 const router = require("express").Router();
 const { validate } = require("../../validation/common.validation");
-const { createInquirySchema } = require("../../validation/inquiry.validation");
+const {
+  createInquirySchema,
+  inquiryReplaySchema,
+} = require("../../validation/inquiry.validation");
 const {
   allInquiries,
   createInquiry,
@@ -9,6 +12,6 @@ const {
 
 router.get("/", allInquiries);
 router.post("/create", validate(createInquirySchema), createInquiry);
-router.post("/replay", inquiryReplay);
+router.post("/replay", validate(inquiryReplaySchema), inquiryReplay);
 
 module.exports = router;

@@ -1,7 +1,7 @@
 const { check } = require("express-validator");
 
 const createInquirySchema = [
-  check("fullName").notEmpty().withMessage("First Name is required"),
+  check("fullName").notEmpty().withMessage("Full Name is required"),
   check("email")
     .notEmpty()
     .withMessage("Email is required")
@@ -15,6 +15,12 @@ const createInquirySchema = [
   check("comment").notEmpty().withMessage("Information is required"),
 ];
 
+const inquiryReplaySchema = [
+  check("inquiryId").notEmpty().withMessage("Inquiry Id is required"),
+  check("replay").notEmpty().withMessage("Replay is required"),
+];
+
 module.exports = {
   createInquirySchema,
+  inquiryReplaySchema,
 };
