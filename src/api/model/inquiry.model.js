@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 
-const querySchema = new mongoose.Schema(
+const schema = new mongoose.Schema(
   {
-    fullName: {
+    full_name: {
       type: String,
       require: true,
       trim: true,
@@ -15,7 +15,7 @@ const querySchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
-    contactNumber: {
+    contact_number: {
       type: String,
       require: true,
       min: 10,
@@ -29,4 +29,4 @@ const querySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("customer_query", querySchema);
+module.exports = mongoose.model("Inquiry", schema);

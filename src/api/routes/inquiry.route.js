@@ -1,8 +1,6 @@
 const router = require("express").Router();
-const {
-  isRequestValidated,
-  isValidateCustomerQuery,
-} = require("../../validator/validator");
+const { validate } = require("../../validation/common.validation");
+const { createInquirySchema } = require("../../validation/inquiry.validation");
 const {
   allInquiries,
   createInquiry,
@@ -10,12 +8,7 @@ const {
 } = require("../controllers/inquiry.controller");
 
 router.get("/", allInquiries);
-router.post(
-  "/create",
-  isValidateCustomerQuery,
-  isRequestValidated,
-  createInquiry
-);
+router.post("/create", validate(createInquirySchema), createInquiry);
 router.post("/replay", inquiryReplay);
 
 module.exports = router;
