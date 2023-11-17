@@ -1,39 +1,35 @@
 const { StatusCodes } = require("http-status-codes");
 const Inquiry = require("../model/inquiry.model");
-const InquiryReplay = require("../model/inquiry.replay.model");
+const { sendMail } = require("../../helpers/mail.helper");
 
 const createInquiry = async (req, res) => {
   try {
     const { fullName, email, contactNumber, comment } = req.body;
-    if (!fullName || !email || !contactNumber || !comment) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "Please Provide Required Information",
-      });
-    }
-    const status = "Pending";
-    const queryData = {
-      fullName,
-      email,
-      contactNumber,
-      comment,
-      status,
-    };
 
-    customerquery.create(queryData).then((result, err) => {
-      if (!err) {
-        sendMail(result, res);
-        console.log("new queryData create ==>>", result);
-      } else {
-        res.json({
-          status: "Faild",
-          message: err.message,
-        });
-      }
+    let inquiry = new Inquiry({
+      full_name: fullName,
+      email,
+      comment,
+      contact_number: contactNumber,
+    });
+    inquiry = await inquiry.save();
+
+    await sendMail(
+      {
+        email: email,
+        subject: "Inquiry created",
+        root: "../../email-template/inquiry.hbs",
+        templateData: { name: fullName, inquiry: comment },
+      },
+      true
+    );
+
+    return res.status(StatusCodes.CREATED).json({
+      message: "Inquiry created successfully",
     });
   } catch (err) {
     console.log(err);
-    res.json({
-      status: "Faild",
+    res.status(StatusCodes.BAD_REQUEST).json({
       message: err.message,
     });
   }
@@ -41,49 +37,56 @@ const createInquiry = async (req, res) => {
 
 const allInquiries = async (req, res) => {
   try {
-    const allquery = await customerquery.find();
-    res.json(allquery);
+    const allInquiries = await Inquiry.find();
+    return res.status(StatusCodes.OK).json({
+      message: "Fetch all inquiry",
+      data: allInquiries,
+    });
   } catch (err) {
-    res.json({ message: err });
+    console.log(err);
+    res.status(StatusCodes.BAD_REQUEST).json({
+      message: err.message,
+    });
   }
 };
 
 const inquiryReplay = async (req, res) => {
   try {
-    const { customerId, replay, email } = req.body;
+    const { inquiryId, replay } = req.body;
 
-    console.log("replaycustomerRecords", customerId, replay);
-    if (!customerId || !replay || !email) {
-      throw Error("Empty  details are not allowed.");
-    } else {
-      const replaycustomerRecords = await customerquery.find({
-        customerId,
-      });
-      if (replaycustomerRecords[0] <= 0) {
-        throw new Error(
-          "Account Record doesn't exist, or has been verify already. Please signup or login."
-        );
-      } else {
-        await customerquery.updateOne(
-          { _id: customerId },
-          { status: "Compalate" }
-        );
-      }
-      replaycustomer.create(req.body).then((result, err) => {
-        if (!err) {
-          replaysend(result, res);
-          console.log("new queryData create ==>>", result);
-        } else {
-          res.json({
-            status: "Faild",
-            message: err.message,
-          });
-        }
-      });
+    let inquiry = await Inquiry.findOne({ _id: inquiryId });
+    if (!inquiry) {
+      throw new Error("Inquiry not found.");
     }
+
+    if (inquiry.status === "COMPLETED") {
+      throw new Error(
+        "Account record has been verify already. Please signup or login."
+      );
+    }
+
+    inquiry["status"] = "COMPLETED";
+    inquiry["replay"] = replay;
+
+    inquiry = await inquiry.save();
+
+    await sendMail({
+      email: inquiry.email,
+      subject: "Inquiry replay",
+      root: "../../email-template/inquiry.replay.hbs",
+      templateData: {
+        name: inquiry.full_name,
+        inquiry: inquiry.comment,
+        replay: replay,
+      },
+    });
+
+    return res.status(StatusCodes.CREATED).json({
+      message: "Inquiry verify successfully",
+    });
   } catch (err) {
-    res.json({
-      status: "Failed",
+    console.log(err);
+    res.status(StatusCodes.BAD_REQUEST).json({
       message: err.message,
     });
   }

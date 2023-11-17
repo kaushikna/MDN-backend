@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const handlebars = require("handlebars");
 
-const sendMail = async (mailData) => {
+const sendMail = async (mailData, sendToAdmin) => {
   try {
     const emailTemplateSource = fs.readFileSync(
       path.join(__dirname, mailData.root),
@@ -24,12 +24,22 @@ const sendMail = async (mailData) => {
         refreshToken: process.env.REFRESH_TOKEN,
       },
     });
-    await transporter.sendMail({
-      from: process.env.EMAIL,
-      to: mailData.email,
-      subject: mailData.subject,
-      html: htmlToSend,
-    });
+
+    if (sendToAdmin) {
+      await transporter.sendMail({
+        from: mailData.email,
+        to: process.env.EMAIL,
+        subject: mailData.subject,
+        html: htmlToSend,
+      });
+    } else {
+      await transporter.sendMail({
+        from: process.env.EMAIL,
+        to: mailData.email,
+        subject: mailData.subject,
+        html: htmlToSend,
+      });
+    }
   } catch (error) {
     console.log("Error while sending mail ", error);
     throw error;
