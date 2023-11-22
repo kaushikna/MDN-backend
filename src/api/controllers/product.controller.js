@@ -1,4 +1,5 @@
 const { StatusCodes } = require("http-status-codes");
+const mongoose = require("mongoose");
 const Product = require("../model/product.model");
 const ProductVariant = require("../model/productVariant.model");
 const Category = require("../model/category.model");
@@ -8,7 +9,7 @@ const allProducts = async (req, res) => {
     const allProducts = await Product.aggregate([
       {
         $lookup: {
-          from: "productVariants",
+          from: "productvariants",
           localField: "_id",
           foreignField: "product",
           as: "productVariants",
@@ -31,7 +32,22 @@ const getProduct = async (req, res) => {
   try {
     const productId = req.params.id;
 
-    let product = await Product.findOne({ _id: productId });
+    const product = await Product.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(productId),
+        },
+      },
+      {
+        $lookup: {
+          from: "productvariants",
+          localField: "_id",
+          foreignField: "product",
+          as: "productVariants",
+        },
+      },
+    ]);
+
     if (!product) {
       throw new Error("Product not found.");
     }
@@ -101,20 +117,10 @@ const createProduct = async (req, res) => {
 
 // const createProductVariant = async (req, res) => {
 //   try {
-//     const { name, categoryId } = req.body;
+//     const { price, productId } = req.body;
 
-//     let productExist = await Product.findOne({ name });
-//     if (productExist) {
-//       throw new Error("Product with same name already exist.");
-//     }
-
-//     let category = await Category.findOne({ _id: categoryId });
-//     if (!category) {
-//       throw new Error("Invalid category id.");
-//     }
-
-//     let product = new Product({ name, category: categoryId });
-//     product = await product.save();
+//     let productVariant = new ProductVariant({ price, product: productId });
+//     productVariant = await productVariant.save();
 
 //     return res.status(StatusCodes.CREATED).json({
 //       message: "Product created successfully",

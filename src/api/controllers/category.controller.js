@@ -9,19 +9,17 @@ const allCategories = async (req, res) => {
           from: "products",
           localField: "_id",
           foreignField: "category",
+          pipeline: [
+            {
+              $lookup: {
+                from: "productvariants",
+                localField: "_id",
+                foreignField: "product",
+                as: "productVariants",
+              },
+            },
+          ],
           as: "products",
-      //     let: { userGroupId: '$access' },
-			// pipeline: [
-			// 	{
-			// 		$lookup: {
-			// 			from: 'access_targets',
-			// 			localField: 'userGroupId.accessTargetId',
-			// 			foreignField: '_id',
-			// 			as: 'access_targets_out',
-			// 		},
-			// 	},
-			// ],
-			// as: 'user_groups',
         },
       },
     ]);
