@@ -4,6 +4,6 @@ const { createOrderSchema } = require("../../validation/order.validation");
 const { createOrder, updateOrder } = require("../controllers/order.controller");
 
 router.post("/create", validate(createOrderSchema), createOrder);
-router.put("/update", updateOrder);
+router.put("/update/:id", updateOrder);
 
 module.exports = router;

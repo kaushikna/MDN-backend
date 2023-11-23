@@ -1,12 +1,6 @@
 const mongoose = require("mongoose");
 
 const schema = new mongoose.Schema({
-  user_id: {
-    type: String,
-  },
-  product_id: {
-    type: String,
-  },
   order_no: {
     type: String,
     unique: true,
@@ -19,49 +13,57 @@ const schema = new mongoose.Schema({
     enum: ["Pending", "Confirmed", "Shipped", "Delivered"],
     default: "Pending",
   },
-  house_no: {
-    type: String,
-    require: true,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
   },
-  street_name: {
-    type: String,
-    require: true,
-  },
-  location: {
-    type: String,
-    require: true,
-  },
-  pin_code: {
-    type: String,
-    require: true,
-  },
-  state: {
-    type: String,
-    require: true,
-  },
-  city: {
-    type: String,
-    require: true,
-  },
-  country: {
-    type: String,
-    require: true,
-  },
-  net_quantity: {
-    type: String,
-    require: true,
-    min: 1,
-    max: 5,
-  },
-  order_date: {
-    type: Date,
-    default: Date.now,
-  },
-  product_details: {
-    type: Object,
-  },
-  user_details: {
-    type: Object,
+  order_items: [
+    {
+      product_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+        required: true,
+      },
+      quantity: {
+        type: Number,
+        required: true,
+      },
+      price: {
+        type: Number,
+        required: true,
+      },
+      _id: false,
+    },
+  ],
+  address: {
+    house_no: {
+      type: String,
+      require: true,
+    },
+    street_name: {
+      type: String,
+      require: true,
+    },
+    location: {
+      type: String,
+      require: true,
+    },
+    pin_code: {
+      type: String,
+      require: true,
+    },
+    state: {
+      type: String,
+      require: true,
+    },
+    city: {
+      type: String,
+      require: true,
+    },
+    country: {
+      type: String,
+      require: true,
+    },
   },
 });
 
