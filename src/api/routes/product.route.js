@@ -1,5 +1,6 @@
 const router = require("express").Router();
-const { validate } = require("../../validation/common.validation");
+const multer = require("multer");
+const { validate, joyValidate } = require("../../validation/common.validation");
 const {
   productSchema,
   productVariantSchema,
@@ -8,21 +9,26 @@ const {
   allProducts,
   getProduct,
   getProductVariant,
+  // getSearchProduct,
   createProduct,
-  // createProductVariant,
+  createProductVariant,
   // updateProduct,
   // updateProductVariant,
   // updateProductVariantImage,
   // deleteProduct,
   // deleteProductVariant
 } = require("../controllers/product.controller");
+const { storage } = require("../../helpers/util.helper");
+const upload = multer({ storage: storage });
+
 
 router.get("/", allProducts);
 router.get("/:id", getProduct);
 router.get("/variant/:id", getProductVariant);
+// router.get("/search", getSearchProduct);
 
 router.post("/create", validate(productSchema), createProduct);
-// router.post("/variant/create", validate(productVariantSchema), createProductVariant);
+router.post("/variant/create", upload.array("images", 20), joyValidate(productVariantSchema), createProductVariant);
 
 // router.put("/update/:id", validate(productSchema), updateProduct);
 // router.put("/variant/update/:id", validate(productVariantSchema), updateProductVariant);

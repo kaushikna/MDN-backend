@@ -1,21 +1,33 @@
-const { check } = require("express-validator");
+const Joy = require("joi");
 
-const createOrderSchema = [
-  check("houseNo").notEmpty().withMessage("House No is required"),
-  check("streetName").notEmpty().withMessage("Street Name No is required"),
-  check("nearlocation").notEmpty().withMessage("Near Location No is required"),
-  check("pincode").notEmpty().withMessage("Pincode is required"),
-  check("state").notEmpty().withMessage("state is required"),
-  check("city").notEmpty().withMessage("city is required"),
-  check("country").notEmpty().withMessage("Country is required"),
-  check("netQuantity")
-    .notEmpty()
-    .withMessage("netQuantity is required")
-    .isLength({ min: 1 })
-    .withMessage("netQuantity Must 1 character long")
-    .isLength({ max: 6 })
-    .withMessage("netQuantity Must 6 character long"),
-];
+const createOrderSchema = Joy.object()
+  .keys({
+    userId: Joy.string().required(),
+    orderItems: Joy.array()
+      .items(
+        Joy.object()
+          .keys({
+            product_variant_id: Joy.string().required(),
+            quantity: Joy.number().required(),
+            price: Joy.number().required(),
+          })
+          .unknown()
+      )
+      .required(),
+    address: Joy.object()
+      .keys({
+        house_no: Joy.string().required(),
+        street_name: Joy.string().required(),
+        location: Joy.string().required(),
+        pin_code: Joy.string().required(),
+        state: Joy.string().required(),
+        city: Joy.string().required(),
+        country: Joy.string().required(),
+      })
+      .unknown()
+      .required(),
+  })
+  .unknown();
 
 module.exports = {
   createOrderSchema,

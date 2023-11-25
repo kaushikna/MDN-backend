@@ -29,7 +29,7 @@ const loginSchema = [
   check("password")
     .isLength({ min: 6 })
     .withMessage("Please Enter Valid Password"),
-  check("isAdmin").isBoolean().withMessage("Must be a boolean true or false"),
+  check("isAdmin").isBoolean().withMessage("IsAdmin Must be a boolean true or false"),
 ];
 
 const verifySchema = [
