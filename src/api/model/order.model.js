@@ -17,11 +17,15 @@ const schema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
+  total: {
+    type: Number,
+    required: true,
+  },
   order_items: [
     {
-      product_id: {
+      product_variant_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
+        ref: "productVariant",
         required: true,
       },
       quantity: {

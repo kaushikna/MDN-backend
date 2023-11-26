@@ -115,30 +115,31 @@ const createProduct = async (req, res) => {
   }
 };
 
-// const createProductVariant = async (req, res) => {
-//   try {
-//     const { price, productId } = req.body;
+const createProductVariant = async (req, res) => {
+  try {
+    const { price, productId } = req.body;
 
-//     let productVariant = new ProductVariant({ price, product: productId });
-//     productVariant = await productVariant.save();
+    let productVariant = new ProductVariant({ price, product: productId });
+    productVariant = await productVariant.save();
 
-//     return res.status(StatusCodes.CREATED).json({
-//       message: "Product created successfully",
-//     });
-//   } catch (err) {
-//     console.log(err);
-//     res.status(StatusCodes.BAD_REQUEST).json({
-//       message: err.message,
-//     });
-//   }
-// };
+    return res.status(StatusCodes.CREATED).json({
+      message: "Product created successfully",
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(StatusCodes.BAD_REQUEST).json({
+      message: err.message,
+    });
+  }
+};
 
 module.exports = {
   allProducts,
   getProduct,
   getProductVariant,
+  // getSearchProduct,
   createProduct,
-  // createProductVariant,
+  createProductVariant,
   // updateProduct,
   // updateProductVariant,
   // updateProductVariantImage,

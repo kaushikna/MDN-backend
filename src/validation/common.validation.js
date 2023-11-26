@@ -19,6 +19,18 @@ const validate = (validations) => {
   };
 };
 
+const joyValidate = (validator) => {
+  return async function (req, res, next) {
+    const { error } = validator.validate(req.body);
+    if (error) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
+    } else {
+      return next();
+    }
+  };
+};
+
 module.exports = {
   validate,
+  joyValidate,
 };

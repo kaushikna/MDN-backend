@@ -1,182 +1,100 @@
 const { StatusCodes } = require("http-status-codes");
-
-require("dotenv").config();
-
 const Order = require("../model/order.model");
-const Product = require("../model/product.model");
 const User = require("../model/user.model");
+const ProductVariant = require("../model/productVariant.model");
+const mongoose = require("mongoose");
 
-const createOrder = async (req, res) => {
+const allOrders = async (req, res) => {
   try {
-    const {
-      user_id,
-      product_id,
-      houseNo,
-      streetName,
-      nearlocation,
-      pincode,
-      state,
-      city,
-      country,
-      netQuantity,
-    } = req.body;
-    if (
-      !houseNo ||
-      !streetName ||
-      !nearlocation ||
-      !pincode ||
-      !state ||
-      !city ||
-      !country ||
-      !netQuantity
-    ) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "Please Provide Required Information",
-      });
-    }
+    const allOrders = await Order.find();
 
-    const productDetails = await Product.findById(product_id);
-    const userDetails = await User.findById(user_id);
-    console.log("userDetails", userDetails);
-    if (!productDetails) {
-      return res.status(StatusCodes.NOT_FOUND).json({
-        message: "Product not found",
-      });
-    }
-
-    if (!userDetails) {
-      return res.status(StatusCodes.NOT_FOUND).json({
-        message: "User is not found",
-      });
-    }
-
-    const orderdata = {
-      user_id,
-      product_id,
-      order_status: "Pending",
-      houseNo,
-      streetName,
-      nearlocation,
-      pincode,
-      state,
-      city,
-      country,
-      netQuantity,
-      productDetails: productDetails,
-      userDetails: userDetails,
-    };
-
-    console.log("orderdata", orderdata);
-
-    Order.create(orderdata).then((result, err) => {
-      if (!err) {
-        sendMail(result, res);
-        res.status(StatusCodes.OK).json({
-          message: "order sucessfully",
-          user: orderdata,
-        });
-      } else {
-        res.json({
-          status: "Faild",
-          message: err.message,
-        });
-      }
+    return res.status(StatusCodes.OK).json({
+      message: "Fetch all Order",
+      data: allOrders,
     });
   } catch (err) {
     console.log(err);
-    res.json({
-      status: "Faild",
+    res.status(StatusCodes.BAD_REQUEST).json({
       message: err.message,
     });
   }
 };
 
-const updateOrder = async (req, res) => {
+const getOrder = async (req, res) => {
   try {
-    const {
-      user_id,
-      product_id,
-      houseNo,
-      streetName,
-      nearlocation,
-      pincode,
-      state,
-      city,
-      country,
-      netQuantity,
-    } = req.body;
-    if (
-      !houseNo ||
-      !streetName ||
-      !nearlocation ||
-      !pincode ||
-      !state ||
-      !city ||
-      !country ||
-      !netQuantity
-    ) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "Please Provide Required Information",
-      });
+    const orderId = req.params.id;
+    const order = await Order.find({ _id: orderId });
+    if (!order) {
+      throw new Error("Order not found.");
     }
 
-    const productDetails = await Product.findById(product_id);
-    const userDetails = await User.findById(user_id);
-    console.log("userDetails", userDetails);
-    if (!productDetails) {
-      return res.status(StatusCodes.NOT_FOUND).json({
-        message: "Product not found",
-      });
-    }
-
-    if (!userDetails) {
-      return res.status(StatusCodes.NOT_FOUND).json({
-        message: "User is not found",
-      });
-    }
-
-    const orderdata = {
-      user_id,
-      product_id,
-      order_status: "Pending",
-      houseNo,
-      streetName,
-      nearlocation,
-      pincode,
-      state,
-      city,
-      country,
-      netQuantity,
-      productDetails: productDetails,
-      userDetails: userDetails,
-    };
-
-    console.log("orderdata", orderdata);
-
-    Order.create(orderdata).then((result, err) => {
-      if (!err) {
-        sendMail(result, res);
-        res.status(StatusCodes.OK).json({
-          message: "order sucessfully",
-          user: orderdata,
-        });
-      } else {
-        res.json({
-          status: "Faild",
-          message: err.message,
-        });
-      }
+    return res.status(StatusCodes.OK).json({
+      message: "Fetch order successfully",
+      data: order,
     });
   } catch (err) {
     console.log(err);
-    res.json({
-      status: "Faild",
+    res.status(StatusCodes.BAD_REQUEST).json({
+      message: err.message,
+    });
+  }
+};
+
+const createOrder = async (req, res) => {
+  try {
+    const { userId, orderItems, address } = req.body;
+
+    let user = await User.findOne({ _id: userId });
+    if (!user) {
+      throw new Error("User Not found.");
+    }
+
+    const productVariantIds = [];
+    let total = 0;
+    orderItems.forEach((item) => {
+      productVariantIds.push(
+        new mongoose.Types.ObjectId(item.product_variant_id)
+      ),
+        (total += item.price * item.quantity);
+    });
+    let productVariants = await ProductVariant.find({
+      _id: { $in: productVariantIds },
+    });
+    if (productVariants.length !== productVariantIds.length) {
+      throw new Error("Please start with fresh, some item are not found.");
+    }
+
+    // const instance = new Razorpay({
+    //   key_id: process.env.RZP_KEY_ID,
+    //   key_secret: process.env.RZP_KEY_SECRET,
+    // });
+    // const createOrder = await instance.orders.create({
+    //   amount: +total * 100,
+    //   currency: "INR",
+    //   receipt: "receipt#1",
+    // });
+
+    let order = new Order({
+      user: userId,
+      total: total,
+      order_items: orderItems,
+      address: address,
+    });
+    order = await order.save();
+
+    return res.status(StatusCodes.CREATED).json({
+      message: "Order created successfully",
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(StatusCodes.BAD_REQUEST).json({
       message: err.message,
     });
   }
 };
 
 module.exports = {
+  allOrders,
+  getOrder,
   createOrder,
-  updateOrder
 };
