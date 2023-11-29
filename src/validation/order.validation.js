@@ -29,6 +29,14 @@ const createOrderSchema = Joy.object()
   })
   .unknown();
 
+const paymentSchema = Joy.object()
+.keys({
+  orderId: Joy.string().required(),
+  razorpayPaymentId: Joy.string().required()
+})
+.unknown();
+
 module.exports = {
   createOrderSchema,
+  paymentSchema
 };

@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const schema = new mongoose.Schema({
   order_no: {
     type: String,
-    unique: true,
+    unique: false,
     default: () =>
       Math.floor(1000000000 + Math.random() * 9000000000).toString(),
   },
@@ -20,6 +20,16 @@ const schema = new mongoose.Schema({
   total: {
     type: Number,
     required: true,
+  },
+  order_payment_id: {
+    type: String,
+    require: true,
+  },
+  payment_status: {
+    type: String,
+    require: true,
+    enum: ["Pending", "Success"],
+    default: "Pending",
   },
   order_items: [
     {
