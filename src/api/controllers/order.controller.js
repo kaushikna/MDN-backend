@@ -3,6 +3,7 @@ const Order = require("../model/order.model");
 const User = require("../model/user.model");
 const ProductVariant = require("../model/productVariant.model");
 const mongoose = require("mongoose");
+const Razorpay = require("razorpay");
 
 const allOrders = async (req, res) => {
   try {
@@ -64,15 +65,10 @@ const createOrder = async (req, res) => {
       throw new Error("Please start with fresh, some item are not found.");
     }
 
-    // const instance = new Razorpay({
-    //   key_id: process.env.RZP_KEY_ID,
-    //   key_secret: process.env.RZP_KEY_SECRET,
-    // });
-    // const createOrder = await instance.orders.create({
-    //   amount: +total * 100,
-    //   currency: "INR",
-    //   receipt: "receipt#1",
-    // });
+    const instance = new Razorpay({
+      key_id: process.env.RZP_KEY_ID,
+      key_secret: process.env.RZP_KEY_SECRET,
+    });
 
     let order = new Order({
       user: userId,
@@ -82,8 +78,40 @@ const createOrder = async (req, res) => {
     });
     order = await order.save();
 
+    const createOrder = await instance.orders.create({
+      amount: +total,
+      currency: "INR",
+      receipt: `receipt_${order.order_no}`,
+    });
     return res.status(StatusCodes.CREATED).json({
       message: "Order created successfully",
+      data: {
+        order: order,
+        orderData: createOrder,
+      },
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(StatusCodes.BAD_REQUEST).json({
+      message: err.message,
+    });
+  }
+};
+
+const orderPayment = async (req, res) => {
+  try {
+    const { orderId, razorpayPaymentId } = req.body;
+
+    let order = await Order.findOne({ _id: orderId });
+    if (!order) {
+      throw new Error("Order not found.");
+    }
+    order.order_payment_id = razorpayPaymentId;
+    order.payment_status = 'Success'
+    order = await order.save();
+
+    return res.status(StatusCodes.CREATED).json({
+      message: "Payment successful"
     });
   } catch (err) {
     console.log(err);
@@ -97,4 +125,5 @@ module.exports = {
   allOrders,
   getOrder,
   createOrder,
+  orderPayment
 };
