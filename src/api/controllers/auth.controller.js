@@ -139,7 +139,7 @@ const resendOTP = async (req, res) => {
       email: email,
       subject: "Email Verification",
       root: "../../email-template/verification.hbs",
-      templateData: { name: firstName + " " + lastName, otp: OTP },
+      templateData: { name: user.first_name + " " + user.last_name, otp: OTP },
     });
 
     let verification = new Verification({
