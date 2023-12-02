@@ -1,5 +1,12 @@
 const Joy = require("joi");
 
+const searchSchema = Joy.object()
+.keys({
+  formDate: Joy.date().required(),
+  toDate: Joy.date().required()
+})
+.unknown()
+
 const createOrderSchema = Joy.object()
   .keys({
     userId: Joy.string().required(),
@@ -36,7 +43,17 @@ const paymentSchema = Joy.object()
 })
 .unknown();
 
+const shippingSchema = Joy.object()
+.keys({
+  orderId: Joy.string().required(),
+  packingId: Joy.string().required(),
+  details: Joy.string().required()
+})
+.unknown();
+
 module.exports = {
+  searchSchema,
   createOrderSchema,
-  paymentSchema
+  paymentSchema,
+  shippingSchema
 };
