@@ -4,6 +4,7 @@ const User = require("../model/user.model");
 const ProductVariant = require("../model/productVariant.model");
 const mongoose = require("mongoose");
 const Razorpay = require("razorpay");
+const moment = require("moment");
 
 const allOrders = async (req, res) => {
   try {
@@ -24,7 +25,7 @@ const allOrders = async (req, res) => {
 const getOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
-    const order = await Order.find({ _id: orderId });
+    const order = await Order.findOne({ _id: orderId });
     if (!order) {
       throw new Error("Order not found.");
     }
@@ -107,11 +108,83 @@ const orderPayment = async (req, res) => {
       throw new Error("Order not found.");
     }
     order.order_payment_id = razorpayPaymentId;
-    order.payment_status = 'Success'
+    order.payment_status = "Success";
     order = await order.save();
 
     return res.status(StatusCodes.CREATED).json({
-      message: "Payment successful"
+      message: "Payment successful",
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(StatusCodes.BAD_REQUEST).json({
+      message: err.message,
+    });
+  }
+};
+
+const searchOrder = async (req, res) => {
+  try {
+    const { formDate, toDate } = req.body;
+
+    let orders = await Order.find({
+      createdAt: {
+        $gte: moment(formDate).startOf("day"),
+        $lte: moment(toDate).endOf("day"),
+      },
+    }).sort({ createdAt: -1 });
+
+    return res.status(StatusCodes.OK).json({
+      message: "Fetch all Order",
+      data: orders,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(StatusCodes.BAD_REQUEST).json({
+      message: err.message,
+    });
+  }
+};
+
+const orderConfirm = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+
+    let order = await Order.findOne({ _id: orderId });
+    if (!order) {
+      throw new Error("Order not found.");
+    }
+
+    order["order_status"] = "Confirmed";
+    order = await order.save();
+
+    return res.status(StatusCodes.OK).json({
+      message: "Your order confirm successfully",
+      data: order,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(StatusCodes.BAD_REQUEST).json({
+      message: err.message,
+    });
+  }
+};
+
+const orderShippingDetail = async (req, res) => {
+  try {
+    const { orderId, packingId, details } = req.body;
+
+    let order = await Order.findOne({ _id: orderId });
+    if (!order) {
+      throw new Error("Order not found.");
+    }
+
+    order["shipping_id"] = packingId;
+    order["shipping_detail"] = details;
+    order = await order.save();
+
+    return res.status(StatusCodes.OK).json({
+      message: "Order shipping detail add successfully",
+      data: order,
     });
   } catch (err) {
     console.log(err);
@@ -125,5 +198,8 @@ module.exports = {
   allOrders,
   getOrder,
   createOrder,
-  orderPayment
+  orderPayment,
+  searchOrder,
+  orderConfirm,
+  orderShippingDetail
 };
