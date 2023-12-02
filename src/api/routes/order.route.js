@@ -1,14 +1,19 @@
 const router = require("express").Router();
+const { joyValidate } = require("../../validation/common.validation");
 const {
-  isRequestValidated,
-  isOrderDetails,
-} = require("../../validator/validator");
+  createOrderSchema,
+  paymentSchema,
+} = require("../../validation/order.validation");
 const {
+  allOrders,
+  getOrder,
   createOrder,
-  updateOrder
+  orderPayment
 } = require("../controllers/order.controller");
 
-router.post("/create", isRequestValidated, isOrderDetails, createOrder);
-router.put("/update", isRequestValidated, updateOrder);
+router.get("/", allOrders);
+router.get("/:id", getOrder);
+router.post("/create", joyValidate(createOrderSchema), createOrder);
+router.post("/payment/success", joyValidate(paymentSchema), orderPayment);
 
 module.exports = router;

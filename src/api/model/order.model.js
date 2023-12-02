@@ -1,70 +1,84 @@
 const mongoose = require("mongoose");
 
-const orderSchema = new mongoose.Schema({
-  user_id: { 
+const schema = new mongoose.Schema({
+  order_no: {
     type: String,
-  },
-  product_id:{
-    type: String,
-  },
-  orderNo: {
-    type: String,
-    unique: true,
+    unique: false,
     default: () =>
       Math.floor(1000000000 + Math.random() * 9000000000).toString(),
   },
-  order_status:{
+  order_status: {
     type: String,
     require: true,
-    enum: ['Pending', 'Confirmed', 'Shipped', 'Delivered'],
-    default: 'Pending',
+    enum: ["Pending", "Confirmed", "Shipped", "Delivered"],
+    default: "Pending",
   },
-  houseNo: {
-    type: String,
-    require: true,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
   },
-  streetName: {
-    type: String,
-    require: true,
+  total: {
+    type: Number,
+    required: true,
   },
-  nearlocation: {
-    type: String,
-    require: true,
-  },
-  pincode: {
+  order_payment_id: {
     type: String,
     require: true,
   },
-  state: {
+  payment_status: {
     type: String,
     require: true,
+    enum: ["Pending", "Success"],
+    default: "Pending",
   },
-  city: {
-    type: String,
-    require: true,
+  order_items: [
+    {
+      product_variant_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "productVariant",
+        required: true,
+      },
+      quantity: {
+        type: Number,
+        required: true,
+      },
+      price: {
+        type: Number,
+        required: true,
+      },
+      _id: false,
+    },
+  ],
+  address: {
+    house_no: {
+      type: String,
+      require: true,
+    },
+    street_name: {
+      type: String,
+      require: true,
+    },
+    location: {
+      type: String,
+      require: true,
+    },
+    pin_code: {
+      type: String,
+      require: true,
+    },
+    state: {
+      type: String,
+      require: true,
+    },
+    city: {
+      type: String,
+      require: true,
+    },
+    country: {
+      type: String,
+      require: true,
+    },
   },
-  country: {
-    type: String,
-    require: true,
-  },
-  netQuantity: {
-    type: String,
-    require: true,
-    min: 1,
-    max: 5,
-  },
-  orderDate: {
-    type: Date,
-    default: Date.now,
-  },
-  productDetails:{
-    type:Object
-  },
-  userDetails:{
-    type:Object
-  }
 });
 
-const Order = mongoose.model("Order", orderSchema);
-
-module.exports = Order;
+module.exports = mongoose.model("Order", schema);

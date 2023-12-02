@@ -1,11 +1,15 @@
 const mongoose = require("mongoose");
 
-const UserOtpVarificationSchema = new mongoose.Schema({
-  userId: String,
-  otp: String,
-  createdAt: Date,
-  expiresAt: Date,
-});
+const schema = new mongoose.Schema(
+  {
+    user_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
+    otp: String,
+  },
+  { timestamps: true }
+);
 
-// create db collection
-module.exports = mongoose.model("varifyOtp1", UserOtpVarificationSchema);
+module.exports = mongoose.model("Verification", schema);
