@@ -7,6 +7,10 @@ const { generateOTP } = require("../../helpers/util.helper");
 const moment = require("moment");
 const bcrypt = require("bcrypt");
 
+
+
+// const mailjet = require('node-mailjet')
+
 const logIn = async (req, res) => {
   try {
     const { email, password, isAdmin } = req.body;
@@ -206,6 +210,48 @@ const forgotPassword = async (req, res) => {
     });
   }
 };
+// const mailconnect = mailjet.connect(
+//   'c3dd9f944cb6d6c626585debac4faf6f',
+//   '1c5b05dabf7207e0f28e4287e0cdcb9b'
+// );
+
+// Prepare the email data
+// const emailData = {
+//   Messages: [
+//     {
+//       From: {
+//         Email: 'mdneletronics@gmail.com',
+//         Name: 'mdneletronics',
+//       },
+//       To: [
+//         {
+//           Email: 'kaushiknakrani4141@gmail.com',
+//           Name: 'otpppp',
+//         },
+//       ],
+//       Subject: 'Subject of the email',
+//       TextPart: 'Text content of the email',
+//       HTMLPart: '<p>HTML content of the email</p>',
+//     },
+//   ],
+// };
+
+// // Send the email
+// const sendEmailss = async () => {
+//   try {
+//     const response = await mailconnect.post('send', { version: 'v3.1' }).request({
+//       Messages: emailData.Messages,
+//     });
+
+//     console.log('Email sent successfully:', response.body);
+//   } catch (error) {
+//     console.error('Error sending email:', error.statusCode, error.response.body);
+//   }
+// };
+
+// Call the function to send the email
+
+
 
 module.exports = {
   logIn,

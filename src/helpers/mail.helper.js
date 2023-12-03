@@ -12,18 +12,28 @@ const sendMail = async (mailData, sendToAdmin) => {
     const template = handlebars.compile(emailTemplateSource);
     const htmlToSend = template({ ...mailData?.templateData });
 
+    // let transporter = nodemailer.createTransport({
+    //   service: "gmail",
+    //   port: 587,
+    //   auth: {
+    //     type: "OAuth2",
+    //     user: process.env.EMAIL,
+    //     pass: process.env.SMTP_PASSWORD,
+    //     clientId: process.env.CLIENT_ID,
+    //     clientSecret: process.env.CLIENT_SECRET,
+    //     refreshToken: process.env.REFRESH_TOKEN,
+    //   },
+    // });
+
     let transporter = nodemailer.createTransport({
-      service: "gmail",
-      port: 587,
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
       auth: {
-        type: "OAuth2",
-        user: process.env.EMAIL,
-        pass: process.env.SMTP_PASSWORD,
-        clientId: process.env.CLIENT_ID,
-        clientSecret: process.env.CLIENT_SECRET,
-        refreshToken: process.env.REFRESH_TOKEN,
-      },
-    });
+          user: "mdneletronics@gmail.com",
+          pass: "unfnzmlgepytugoo"
+      }
+  });
 
     if (sendToAdmin) {
       await transporter.sendMail({
