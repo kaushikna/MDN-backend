@@ -13,7 +13,8 @@ const {
   createOrder,
   orderPayment,
   orderShippingDetail,
-  orderConfirm
+  orderConfirm,
+  orderDelivered
 } = require("../controllers/order.controller");
 
 router.get("/", allOrders);
@@ -23,5 +24,6 @@ router.post("/create", joyValidate(createOrderSchema), createOrder);
 router.post("/payment/success", joyValidate(paymentSchema), orderPayment);
 router.post("/shipping/detail", joyValidate(shippingSchema), orderShippingDetail);
 router.post("/confirm/:id", orderConfirm);
+router.post("/delivered/:id", orderDelivered);
 
 module.exports = router;

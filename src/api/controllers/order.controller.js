@@ -5,6 +5,7 @@ const ProductVariant = require("../model/productVariant.model");
 const mongoose = require("mongoose");
 const Razorpay = require("razorpay");
 const moment = require("moment");
+const { sendMail } = require("../../helpers/mail.helper");
 
 const allOrders = async (req, res) => {
   try {
@@ -149,13 +150,40 @@ const orderConfirm = async (req, res) => {
   try {
     const orderId = req.params.id;
 
-    let order = await Order.findOne({ _id: orderId });
-    if (!order) {
+    let order = await Order.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(orderId),
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+    ]);
+    if (!order[0]) {
       throw new Error("Order not found.");
     }
 
-    order["order_status"] = "Confirmed";
-    order = await order.save();
+    await sendMail({
+      email: order[0].user[0].email,
+      subject: "Order confirm",
+      root: "../../email-template/order.confirm.hbs",
+      templateData: {
+        name: order[0].user[0].first_name + " " + order[0].user[0].last_name,
+        no: order[0].order_no,
+      },
+    });
+
+    order = await Order.findByIdAndUpdate(
+      { _id: orderId },
+      { order_status: "Confirmed" },
+      { new: true }
+    );
 
     return res.status(StatusCodes.OK).json({
       message: "Your order confirm successfully",
@@ -173,17 +201,103 @@ const orderShippingDetail = async (req, res) => {
   try {
     const { orderId, packingId, details } = req.body;
 
-    let order = await Order.findOne({ _id: orderId });
-    if (!order) {
+    let order = await Order.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(orderId),
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+    ]);
+    if (!order[0]) {
       throw new Error("Order not found.");
     }
 
-    order["shipping_id"] = packingId;
-    order["shipping_detail"] = details;
-    order = await order.save();
+    await sendMail({
+      email: order[0].user[0].email,
+      subject: "Order shipping detail",
+      root: "../../email-template/shipping.detail.hbs",
+      templateData: {
+        name: order[0].user[0].first_name + " " + order[0].user[0].last_name,
+        order_no: order[0].order_no,
+        shipping_id: packingId,
+        shipping_detail: details,
+      },
+    });
+
+    order = await Order.findByIdAndUpdate(
+      { _id: orderId },
+      {
+        shipping_id: packingId,
+        shipping_detail: details,
+        order_status: "Shipped",
+      },
+      { new: true }
+    );
 
     return res.status(StatusCodes.OK).json({
       message: "Order shipping detail add successfully",
+      data: order,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(StatusCodes.BAD_REQUEST).json({
+      message: err.message,
+    });
+  }
+};
+
+const orderDelivered = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+
+    let order = await Order.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(orderId),
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+    ]);
+    if (!order[0]) {
+      throw new Error("Order not found.");
+    }
+    if (order[0].payment_status != "Success") {
+      throw new Error("Order payment not completed.");
+    }
+
+    await sendMail({
+      email: order[0].user[0].email,
+      subject: "Order delivered",
+      root: "../../email-template/order.delivered.hbs",
+      templateData: {
+        name: order[0].user[0].first_name + " " + order[0].user[0].last_name,
+        no: order[0].order_no,
+      },
+    });
+
+    order = await Order.findByIdAndUpdate(
+      { _id: orderId },
+      { order_status: "Delivered", delivered_date: new Date() },
+      { new: true }
+    );
+
+    return res.status(StatusCodes.OK).json({
+      message: "Your order delivered successfully",
       data: order,
     });
   } catch (err) {
@@ -201,5 +315,6 @@ module.exports = {
   orderPayment,
   searchOrder,
   orderConfirm,
-  orderShippingDetail
+  orderShippingDetail,
+  orderDelivered,
 };

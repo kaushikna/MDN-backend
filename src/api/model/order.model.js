@@ -32,6 +32,10 @@ const schema = new mongoose.Schema(
       enum: ["Pending", "Success"],
       default: "Pending",
     },
+    delivered_date: {
+      type: Date,
+      require: false,
+    },
     order_items: [
       {
         product_variant_id: {
@@ -87,7 +91,7 @@ const schema = new mongoose.Schema(
     shipping_detail: {
       type: String,
       require: false,
-    }
+    },
   },
   { timestamps: true }
 );

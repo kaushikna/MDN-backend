@@ -58,11 +58,21 @@ const productVariantSchema = Joy.object()
   .keys({
     productId: Joy.string().required(),
     colorName: Joy.string().required(),
-    colorCode: Joy.string().required()
+    colorCode: Joy.string().required(),
+  })
+  .unknown();
+
+const reviewSchema = Joy.object()
+  .keys({
+    orderNo: Joy.string().required(),
+    productId: Joy.string().required(),
+    customer_review: Joy.string().required(),
+    customer_id: Joy.string().required(),
   })
   .unknown();
 
 module.exports = {
   productSchema,
   productVariantSchema,
+  reviewSchema,
 };

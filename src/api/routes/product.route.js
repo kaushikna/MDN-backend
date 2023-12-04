@@ -30,7 +30,7 @@ router.post("/variant/create", upload.array("images", 20), joyValidate(productVa
 
 router.put("/update/:id", joyValidate(productSchema), updateProduct);
 router.put("/variant/update/:id", joyValidate(productVariantSchema), updateProductVariant);
-router.put("/variant/:id/images/:index",  upload.single("images"), updateProductVariantImage);
+router.put("/variant/:id/images/:index", upload.single("images"), updateProductVariantImage);
 
 router.delete("/delete/:id", deleteProduct);
 router.delete("/variant/delete/:id", deleteProductVariant);
